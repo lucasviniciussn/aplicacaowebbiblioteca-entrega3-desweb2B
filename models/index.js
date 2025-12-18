@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 const database = require('../config/database');
 
-// Importação dos Modelos
 const Livro = require('./livro.models');
 const Usuario = require('./usuario.models');
 const Biblioteca = require('./biblioteca.models');
@@ -9,23 +8,19 @@ const Acervo = require('./acervo.models');
 const Autor = require('./autor.models');
 const Categoria = require('./categoria.models');
 const Reserva = require('./reserva.models');
-// [NOVO] Importando Carteira (Certifique-se de ter criado o arquivo carteira.models.js)
 const Carteira = require('./carteira.models'); 
 
-// ==========================================================
-// 1. ASSOCIAÇÃO UM-PARA-UM (Usuario <-> Carteira)
-// ==========================================================
+// 1. ASSOCIAÇÃO UM-PARA-UM
+
 Usuario.hasOne(Carteira, { foreignKey: 'usuarioId', as: 'carteira' });
 Carteira.belongsTo(Usuario, { foreignKey: 'usuarioId', as: 'usuario' });
 
-// ==========================================================
-// 2. ASSOCIAÇÃO MUITOS-PARA-MUITOS (Livro <-> Autor)
-// ==========================================================
-// Mudança CRÍTICA: De 'belongsTo' para 'belongsToMany'
+// 2. ASSOCIAÇÃO MUITOS-PARA-MUITOS
+
 Livro.belongsToMany(Autor, { 
-    through: 'LivroAutores', // Nome da tabela de junção
+    through: 'LivroAutores',
     foreignKey: 'livroId', 
-    as: 'autores' // [PLURAL] O app.js procura por 'autores', não 'autor'
+    as: 'autores'
 });
 
 Autor.belongsToMany(Livro, { 
@@ -34,9 +29,8 @@ Autor.belongsToMany(Livro, {
     as: 'livros' 
 });
 
-// ==========================================================
-// 3. OUTRAS ASSOCIAÇÕES (1:N)
-// ==========================================================
+// 3. OUTRAS ASSOCIAÇÕES
+
 Categoria.hasMany(Livro, { as: 'livros', foreignKey: 'categoriaId' });
 Livro.belongsTo(Categoria, { as: 'categoria', foreignKey: 'categoriaId' });
 
@@ -58,4 +52,5 @@ Reserva.belongsTo(Livro, { as: 'livroReservado', foreignKey: 'livroId' });
 // Exporta tudo, inclusive a Carteira
 module.exports = {
     database, Livro, Usuario, Biblioteca, Acervo, Autor, Categoria, Reserva, Carteira
+
 };
