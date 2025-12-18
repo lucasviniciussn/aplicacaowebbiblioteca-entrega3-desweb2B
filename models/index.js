@@ -10,12 +10,9 @@ const Categoria = require('./categoria.models');
 const Reserva = require('./reserva.models');
 const Carteira = require('./carteira.models'); 
 
-// 1. ASSOCIAÇÃO UM-PARA-UM
-
 Usuario.hasOne(Carteira, { foreignKey: 'usuarioId', as: 'carteira' });
 Carteira.belongsTo(Usuario, { foreignKey: 'usuarioId', as: 'usuario' });
 
-// 2. ASSOCIAÇÃO MUITOS-PARA-MUITOS
 
 Livro.belongsToMany(Autor, { 
     through: 'LivroAutores',
@@ -28,8 +25,6 @@ Autor.belongsToMany(Livro, {
     foreignKey: 'autorId', 
     as: 'livros' 
 });
-
-// 3. OUTRAS ASSOCIAÇÕES
 
 Categoria.hasMany(Livro, { as: 'livros', foreignKey: 'categoriaId' });
 Livro.belongsTo(Categoria, { as: 'categoria', foreignKey: 'categoriaId' });
@@ -49,8 +44,6 @@ Reserva.belongsTo(Usuario, { as: 'usuario', foreignKey: 'usuarioId' });
 Livro.hasMany(Reserva, { as: 'reservasLivro', foreignKey: 'livroId' });
 Reserva.belongsTo(Livro, { as: 'livroReservado', foreignKey: 'livroId' });
 
-// Exporta tudo, inclusive a Carteira
 module.exports = {
     database, Livro, Usuario, Biblioteca, Acervo, Autor, Categoria, Reserva, Carteira
-
 };

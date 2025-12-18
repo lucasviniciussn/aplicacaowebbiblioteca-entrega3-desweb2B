@@ -12,13 +12,15 @@ const Usuario = database.define('usuario', {
         type: Sequelize.STRING,
         allowNull: false
     },
-    email: {
+    cpf: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true
+        allowNull: false
     },
-    telefone: {
-        type: Sequelize.STRING
+    idade: {
+        type: Sequelize.INTEGER
+    },
+    nivel: {
+        type: Sequelize.INTEGER
     }
 });
 

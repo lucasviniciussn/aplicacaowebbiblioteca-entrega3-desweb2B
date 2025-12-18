@@ -8,13 +8,16 @@ const Biblioteca = database.define('biblioteca', {
         allowNull: false,
         primaryKey: true
     },
-    nome: {
+    cnpj: {
         type: Sequelize.STRING,
         allowNull: false
     },
-    endereco: {
-        type: Sequelize.STRING,
-        allowNull: false
+    cep: {
+        type: Sequelize.STRING
+    },
+    acervo_total: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
     }
 });
 
