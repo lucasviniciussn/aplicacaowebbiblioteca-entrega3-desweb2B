@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Livros</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Cadastrar Novo Livro</h2>
+        <form id="formCreate">
+            <div class="form-group">
+                <label>Título da Obra:</label>
+                <input type="text" name="nome" required> </div>
+
+            <div class="form-group">
+                <label>Autores (Segure Ctrl para selecionar vários):</label>
+                <select name="autoresIds" multiple required style="height: 100px;">
+                    {{#each autores}}
+                        <option value="{{this.id}}">{{this.nome}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria (Gênero):</label>
+                <select name="categoriaId" required>
+                    <option value="">-- Selecione a Categoria --</option>
+                    {{#each categorias}}
+                        <option value="{{this.id}}">{{this.descricao}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tags:</label>
+                <input type="text" name="tags" placeholder="Ex: aventura,classico">
+            </div>
+
+            <div class="form-group">
+                <label>Quantidade Total (Cria cópias no Acervo):</label>
+                <input type="number" name="quantidade_total" placeholder="Ex: 5" required>
+            </div>
+
+            <div class="form-group">
+                <label>Biblioteca Inicial (Para o Acervo):</label>
+                <select name="idbiblioteca" required>
+                    {{#each bibliotecas}}
+                        <option value="{{this.id}}">Biblioteca {{this.id}} - {{this.cnpj}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <button type="submit">Cadastrar Livro</button>
+        </form>
+
+        <h2 style="margin-top: 40px;">Catálogo de Livros</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Autores</th>
+                    <th>Categoria</th>
+                    <th>Total Cópias</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each livros}}
+                <tr onclick="window.location.href='/livros/{{this.id}}'" style="cursor:pointer">
+                    <td>{{this.id}}</td>
+                    <td>{{this.titulo}}</td>
+                    <td>
+                        {{#each this.autores}}
+                            {{this.nome}}{{#unless @last}}, {{/unless}}
+                        {{/each}}
+                    </td> 
+                    <td>{{this.categoria.descricao}}</td>
+                    <td>{{this.quantidade_total}}</td>
+                </tr>
+                {{else}}
+                <tr><td colspan="5">Nenhum livro cadastrado.</td></tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        document.getElementById('formCreate').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            data.autoresIds = formData.getAll('autoresIds');
+
+            try {
+                const res = await fetch('/livros/new', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if(res.ok) {
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Erro ao criar: ' + (err.error || 'Desconhecido'));
+                }
+            } catch (error) {
+
+                if(!error.message.includes('JSON')) alert('Erro: ' + error.message);
+                else window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Reservas</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Nova Reserva</h2>
+        <form id="formReserva">
+            <div class="form-group">
+                <label>ID do Usuário:</label>
+                <input type="number" name="usuarioId" placeholder="ID do Usuário" required>
+            </div>
+            
+            <div class="form-group">
+                <label>ID do Livro:</label>
+                <input type="number" name="livroId" placeholder="ID do Livro" required>
+            </div>
+
+            <button type="submit">Criar Reserva</button>
+        </form>
+
+        <h2 style="margin-top: 40px;">Lista de Reservas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuário</th>
+                    <th>Livro Reservado</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each reservas}}
+                <tr>
+                    <td>{{this.id}}</td>
+                    <td>{{this.nomeUsuario}} (ID: {{this.usuarioId}})</td>
+                    <td>{{this.tituloLivro}} (ID: {{this.livroId}})</td>
+                    <td>{{this.dataReserva}}</td>
+                    <td>
+                        <span class="status-{{this.status}}">{{this.status}}</span>
+                    </td>
+                    <td>
+                        {{#if (eq this.status 'PENDENTE')}}
+                        <button class="btn-small btn-approve" onclick="atualizarStatus('{{this.id}}', 'ATENDIDA')">Atender</button>
+                        <button class="btn-small btn-cancel" onclick="atualizarStatus('{{this.id}}', 'CANCELADA')">Cancelar</button>
+                        {{/if}}
+                        <button class="btn-small btn-delete" onclick="deletarReserva('{{this.id}}')">Excluir</button>
+                    </td>
+                </tr>
+                {{else}}
+                <tr><td colspan="6">Nenhuma reserva registrada.</td></tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        document.getElementById('formReserva').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            try {
+                const res = await fetch('/reservas', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                
+                if(res.ok) window.location.reload(); 
+                else {
+                    const err = await res.json().catch(() => ({})); 
+                    alert('Erro ao criar: ' + (err.error || 'Verifique se IDs existem'));
+                }
+            } catch (e) {
+                window.location.reload();
+            }
+        });
+
+        async function atualizarStatus(id, novoStatus) {
+            try {
+                const res = await fetch('/reservas/'+id, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: novoStatus })
+                });
+                if(res.ok) window.location.reload();
+                else alert('Erro ao atualizar status');
+            } catch (e) { alert('Erro de conexão'); }
+        }
+
+        async function deletarReserva(id) {
+            if(!confirm('Excluir esta reserva do histórico?')) return;
+            try {
+                const res = await fetch('/reservas/'+id, { method: 'DELETE' });
+                if(res.ok) window.location.reload();
+                else alert('Erro ao excluir');
+            } catch (e) { alert('Erro de conexão'); }
+        }
+    </script>
+</body>
+</html>

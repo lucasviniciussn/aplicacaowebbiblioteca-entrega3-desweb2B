@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Usuário</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Editar Usuário: {{usuario.nome}}</h2>
+        
+        <form id="formEdit">
+            <div class="form-group">
+                <label>Nome:</label>
+                <input type="text" name="nome" value="{{usuario.nome}}" required>
+            </div>
+            <div class="form-group">
+                <label>CPF:</label>
+                <input type="text" name="cpf" value="{{usuario.cpf}}" required>
+            </div>
+            <div class="form-group">
+                <label>Idade:</label>
+                <input type="number" name="idade" value="{{usuario.idade}}">
+            </div>
+            <div class="form-group">
+                <label>Nível:</label>
+                <select name="nivel">
+                    {{#each niveis}}
+                        <option value="{{this.id}}" {{#if (eq ../usuario.nivel this.id)}}selected{{/if}}>
+                            {{this.nome}}
+                        </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group" style="background: #f0f0f0; padding: 10px; border-radius: 5px;">
+                <label>Dados da Carteirinha (Automático):</label>
+                <p><strong>Código:</strong> {{usuario.carteira.codigo}}</p>
+                <p><strong>Validade:</strong> {{usuario.carteira.validade}}</p>
+                <small style="color: #666">A carteirinha é gerenciada automaticamente pelo sistema.</small>
+            </div>
+
+            <div class="actions" style="margin-top: 20px;">
+                <button type="submit">Salvar Alterações</button>
+                <button type="button" class="delete" style="background-color: #e74c3c; margin-left: 10px;" onclick="deletar()">Excluir Usuário</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const id = "{{usuario.id}}";
+
+        document.getElementById('formEdit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            try {
+                const res = await fetch('/usuarios/' + id, { 
+                    method: 'PUT', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert('Usuário atualizado!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Erro: ' + (err.error || 'Falha ao atualizar'));
+                }
+            } catch (error) { alert('Erro de conexão'); }
+        });
+
+        async function deletar() {
+            if(confirm('Tem certeza? Isso apagará o usuário e sua carteirinha.')) {
+                try {
+                    const res = await fetch('/usuarios/' + id, { method: 'DELETE' });
+                    if(res.ok) window.location.href = '/usuarios';
+                    else alert('Erro ao deletar');
+                } catch (e) { alert('Erro de conexão'); }
+            }
+        }
+    </script>
+</body>
+</html>

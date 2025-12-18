@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes Biblioteca</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Editar Biblioteca #{{biblioteca.id}}</h2>
+        
+        <form id="formEdit">
+            <div class="form-group">
+                <label>CNPJ:</label>
+                <input type="text" name="cnpj" value="{{biblioteca.cnpj}}" required>
+            </div>
+
+            <div class="form-group">
+                <label>CEP:</label>
+                <input type="text" name="cep" value="{{biblioteca.cep}}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Capacidade do Acervo (Total):</label>
+                <input type="number" name="acervo_total" value="{{biblioteca.acervo_total}}">
+            </div>
+
+            <div class="actions" style="margin-top: 20px;">
+                <button type="submit">Salvar Alterações</button>
+                <button type="button" class="delete" style="background-color: #e74c3c; margin-left: 10px;" onclick="deletar()">Excluir Biblioteca</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const id = "{{biblioteca.id}}";
+
+        document.getElementById('formEdit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            try {
+                const res = await fetch('/bibliotecas/' + id, { 
+                    method: 'PUT', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                
+                if(res.ok) {
+                    alert('Biblioteca atualizada com sucesso!');
+                    window.location.href = '/bibliotecas';
+                } else {
+                    const err = await res.json();
+                    alert('Erro: ' + (err.error || 'Falha ao atualizar'));
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            }
+        });
+
+        async function deletar() {
+            if(confirm('Tem certeza que deseja apagar esta biblioteca? Isso pode falhar se houver livros vinculados.')) {
+                try {
+                    const res = await fetch('/bibliotecas/' + id, { method: 'DELETE' });
+                    
+                    if(res.ok) {
+                        window.location.href = '/bibliotecas';
+                    } else {
+                        const err = await res.json();
+                        alert('Erro ao deletar: ' + (err.error || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    alert('Erro de conexão: ' + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

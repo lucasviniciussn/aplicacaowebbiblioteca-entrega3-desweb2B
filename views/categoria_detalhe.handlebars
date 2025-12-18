@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes Categoria</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Editar Categoria #{{categoria.id}}</h2>
+        
+        <form id="formEdit">
+            <div class="form-group">
+                <label>Descrição:</label>
+                <input type="text" name="descricao" value="{{categoria.descricao}}" required>
+            </div>
+            <div class="form-group">
+                <label>Código:</label>
+                <input type="text" name="codigo" value="{{categoria.codigo}}" required>
+            </div>
+
+            <div class="actions" style="margin-top: 20px;">
+                <button type="submit">Salvar Alterações</button>
+                <button type="button" class="delete" style="background-color: #e74c3c; margin-left: 10px;" onclick="deletar()">Excluir Categoria</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const id = "{{categoria.id}}";
+
+        document.getElementById('formEdit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            try {
+                const res = await fetch('/categorias/' + id, { 
+                    method: 'PUT', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert('Categoria atualizada!');
+                    window.location.href = '/categorias';
+                } else {
+                    const err = await res.json();
+                    alert('Erro: ' + (err.error || 'Falha ao atualizar'));
+                }
+            } catch (error) { alert('Erro de conexão'); }
+        });
+
+        async function deletar() {
+            if(confirm('Tem certeza? Se houver livros nesta categoria, a exclusão será bloqueada.')) {
+                try {
+                    const res = await fetch('/categorias/' + id, { method: 'DELETE' });
+                    if(res.ok) window.location.href = '/categorias';
+                    else {
+                        const err = await res.json();
+                        alert('Erro ao deletar: ' + (err.error || 'Possivelmente vinculada a livros'));
+                    }
+                } catch (e) { alert('Erro de conexão'); }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Bibliotecas</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Nova Biblioteca</h2>
+        <form id="formBib">
+            <div class="form-group">
+                <label>CNPJ:</label>
+                <input type="text" name="cnpj" placeholder="00.000.000/0001-00" required>
+            </div>
+            
+            <div class="form-group">
+                <label>CEP:</label>
+                <input type="text" name="cep" placeholder="00000-000" required>
+            </div>
+
+            <div class="form-group">
+                <label>Capacidade do Acervo (Estimada):</label>
+                <input type="number" name="acervo" placeholder="Ex: 5000">
+            </div>
+
+            <button type="submit">Criar</button>
+        </form>
+
+        <h2 style="margin-top: 40px;">Bibliotecas Cadastradas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>CNPJ</th>
+                    <th>CEP</th>
+                    <th>Acervo Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each bibliotecas}}
+                <tr onclick="window.location.href='/bibliotecas/{{this.id}}'" style="cursor:pointer">
+                    <td>{{this.id}}</td>
+                    <td>{{this.cnpj}}</td>
+                    <td>{{this.cep}}</td>
+                    <td>{{this.acervo_total}}</td>
+                </tr>
+                {{else}}
+                <tr><td colspan="4">Nenhuma biblioteca cadastrada.</td></tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </main>
+    <script>
+        document.getElementById('formBib').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            try {
+                const res = await fetch('/bibliotecas', {
+                    method: 'POST', 
+                    headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                
+                if(res.ok) window.location.reload();
+                else {
+                    const err = await res.json();
+                    alert('Erro ao criar: ' + (err.error || 'Desconhecido'));
+                }
+            } catch (error) {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

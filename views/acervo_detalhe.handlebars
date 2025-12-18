@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes Acervo</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Editar Cópia #{{item.id}}</h2>
+        
+        <form id="formEdit">
+            <div class="form-group">
+                <label>Livro:</label>
+                <select name="livroId">
+                    {{#each livros}}
+                        <option value="{{this.id}}" {{#if (eq ../item.livroId this.id)}}selected{{/if}}>
+                            {{this.titulo}}
+                        </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Biblioteca (CNPJ):</label>
+                <select name="bibliotecaId">
+                    {{#each bibliotecas}}
+                        <option value="{{this.id}}" {{#if (eq ../item.bibliotecaId this.id)}}selected{{/if}}>
+                            {{this.cnpj}}
+                        </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ID do Usuário (Empréstimo):</label>
+                <input type="number" name="idUsuario" value="{{item.usuarioId}}" placeholder="0 ou vazio para Disponível">
+                <small style="color: #666;">
+                    Status atual: 
+                    <span class="{{#if item.usuarioId}}status-ocupado{{else}}status-livre{{/if}}">
+                        {{#if item.usuarioId}}
+                            Emprestado (User {{item.usuarioId}})
+                        {{else}}
+                            Disponível
+                        {{/if}}
+                    </span>
+                </small>
+            </div>
+
+            <div class="actions" style="margin-top: 20px;">
+                <button type="submit">Salvar Alterações</button>
+                <button type="button" class="delete" style="background-color: #e74c3c; margin-left: 10px;" onclick="deletar()">Excluir Cópia</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        const id = "{{item.id}}";
+        
+        document.getElementById('formEdit').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const rawData = Object.fromEntries(formData);
+
+            const data = {
+                livroId: Number(rawData.livroId),
+                bibliotecaId: Number(rawData.bibliotecaId),
+                idUsuario: rawData.idUsuario && rawData.idUsuario.trim() !== '' ? Number(rawData.idUsuario) : null
+            };
+            
+            try {
+                const res = await fetch('/acervo/'+id, { 
+                    method: 'PUT', 
+                    headers:{'Content-Type':'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                
+                if(res.ok) {
+                    alert('Cópia atualizada com sucesso!');
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Erro: ' + (err.error || 'Falha desconhecida'));
+                }
+            } catch (error) {
+                alert('Erro de conexão: ' + error.message);
+            }
+        });
+
+        async function deletar() {
+            if(confirm('Tem certeza? Isso apagará esta cópia física e reduzirá a contagem do livro.')) {
+                try {
+                    const res = await fetch('/acervo/'+id, {method:'DELETE'});
+                    
+                    if(res.ok) {
+                        window.location.href='/acervo';
+                    } else {
+                        const err = await res.json();
+                        alert('Erro ao deletar: ' + (err.error || 'Erro desconhecido'));
+                    }
+                } catch (error) {
+                    alert('Erro de conexão: ' + error.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

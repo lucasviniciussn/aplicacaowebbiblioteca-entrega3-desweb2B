@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Autores</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Gestão de Bibliotecas</h1>
+            <ul>
+                <li><a href="/">Início</a></li>
+                <li><a href="/livros">Livros</a></li>
+                <li><a href="/autores">Autores</a></li>
+                <li><a href="/categorias">Categorias</a></li>
+                <li><a href="/acervo">Acervo</a></li>
+                <li><a href="/reservas">Reservas</a></li>
+                <li><a href="/bibliotecas">Bibliotecas</a></li>
+                <li><a href="/usuarios">Usuários</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Novo Autor</h2>
+        <form id="formAutor">
+            <div class="form-group">
+                <label>Nome Completo:</label>
+                <input type="text" name="nome" required>
+            </div>
+            <div class="form-group">
+                <label>Nacionalidade:</label>
+                <input type="text" name="nacionalidade" placeholder="Ex: Brasileiro">
+            </div>
+            <div class="form-group">
+                <label>Biografia Curta:</label>
+                <textarea name="biografia" rows="3" style="width: 100%; padding: 8px;"></textarea>
+            </div>
+            <button type="submit">Cadastrar Autor</button>
+        </form>
+
+        <h2 style="margin-top: 40px;">Autores Cadastrados</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Nacionalidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each autores}}
+                <tr onclick="window.location.href='/autores/{{this.id}}'" style="cursor: pointer;">
+                    <td>{{this.id}}</td>
+                    <td>{{this.nome}}</td>
+                    <td>{{this.nacionalidade}}</td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td colspan="3">Nenhum autor cadastrado.</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        document.getElementById('formAutor').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            
+            try {
+                const res = await fetch('/autores', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(data)
+                });
+                
+                if(res.ok) {
+                    window.location.reload();
+                } else {
+                    const err = await res.json();
+                    alert('Erro ao criar: ' + (err.error || 'Desconhecido'));
+                }
+            } catch (error) {
+                if(!error.message.includes('Unexpected token')) alert('Erro: ' + error.message);
+                else window.location.reload(); 
+            }
+        });
+    </script>
+</body>
+</html>
